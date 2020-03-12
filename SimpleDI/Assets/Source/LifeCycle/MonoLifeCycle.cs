@@ -54,7 +54,7 @@ namespace SimpleDI
         {
             if (_disposableManager != null)
             {
-                _disposableManager.Update();
+                _disposableManager.Dispose();
             }
         }
     }
