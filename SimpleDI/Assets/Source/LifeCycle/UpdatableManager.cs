@@ -13,9 +13,38 @@ namespace SimpleDI
         [Inject]
         public void InitInjections(IFixedUpdatable[] fixedUpdatables, IUpdatable[] updatables, ILateUpdatable[] lateUpdatables)
         {
-            _fixedUpdatables.AddRange(fixedUpdatables);
-            _updatables.AddRange(updatables);
-            _lateUpdatables.AddRange(lateUpdatables);
+            if (fixedUpdatables != null)
+            {
+                for (int i = 0; i < fixedUpdatables.Length; ++i)
+                {
+                    if (fixedUpdatables[i] != null)
+                    {
+                        _fixedUpdatables.Add(fixedUpdatables[i]);
+                    }
+                }
+            }
+
+            if (updatables != null)
+            {
+                for (int i = 0; i < updatables.Length; ++i)
+                {
+                    if (updatables[i] != null)
+                    {
+                        _updatables.Add(updatables[i]);
+                    }
+                }
+            }
+
+            if (lateUpdatables != null)
+            {
+                for (int i = 0; i < fixedUpdatables.Length; ++i)
+                {
+                    if (fixedUpdatables[i] != null)
+                    {
+                        _lateUpdatables.Add(lateUpdatables[i]);
+                    }
+                }
+            }
         }
 
         public void FixedUpdate()

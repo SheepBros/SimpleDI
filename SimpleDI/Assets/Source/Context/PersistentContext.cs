@@ -49,6 +49,9 @@ namespace SimpleDI
 
         protected override void InstallInternal()
         {
+            MonoLifeCycle lifeCycle = GetComponent<MonoLifeCycle>();
+            Container.BindFrom<MonoLifeCycle>(lifeCycle);
+
             foreach (MonoInstaller installer in _monoInstallers)
             {
                 installer.Initialize(Container);

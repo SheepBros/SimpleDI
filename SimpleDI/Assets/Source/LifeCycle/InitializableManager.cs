@@ -12,7 +12,16 @@ namespace SimpleDI
         [Inject]
         public void InitInjections(IInitializable[] initializables)
         {
-            _initializables.AddRange(initializables);
+            if (initializables != null)
+            {
+                for (int i = 0; i < initializables.Length; ++i)
+                {
+                    if (initializables[i] != null)
+                    {
+                        _initializables.Add(initializables[i]);
+                    }
+                }
+            }
         }
 
         public void Initialize()
@@ -22,7 +31,7 @@ namespace SimpleDI
 
             for (int i = 0; i < _initializables.Count; ++i)
             {
-                _initializables[i].Initlaize();
+                _initializables[i].Initialize();
             }
         }
     }
