@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace SimpleDI
 {
+    [ExecutionOrderAttribute(-9000)]
     public class SceneContext : Context
     {
         public override DiContainer Container { get; protected set; }

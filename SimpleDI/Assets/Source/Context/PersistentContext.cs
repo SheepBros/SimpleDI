@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace SimpleDI
 {
+    [ExecutionOrderAttribute(-9999)]
     public class PersistentContext : Context
     {
         private static PersistentContext _instance;
