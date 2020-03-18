@@ -2,6 +2,7 @@
 
 namespace SimpleDI
 {
+    [ExecutionOrderAttribute(-8900)]
     public class MonoLifeCycle : MonoBehaviour
     {
         private InitializableManager _initializableManager;
