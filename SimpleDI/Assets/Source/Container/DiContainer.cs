@@ -1,6 +1,10 @@
-﻿using System;
+﻿using SimpleDI.Util;
+using System;
+using System.Reflection;
 using System.Diagnostics;
 using System.Collections.Generic;
+using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace SimpleDI
 {
@@ -17,8 +21,6 @@ namespace SimpleDI
         public DiContainer(params DiContainer[] parents)
         {
             _parents.AddRange(parents);
-
-            BindFrom<DiContainer>(this);
         }
 
         public void BindAs<T>(bool singleInstance = true, params object[] args) where T : class
@@ -32,7 +34,7 @@ namespace SimpleDI
         {
             Type fromType = typeof(TFrom);
             Type toType = typeof(TTo);
-            object instance = Instantiate(fromType, args);
+            object instance = InstantiateInternal(fromType, args);
 
             Bind(toType, singleInstance, instance, args: args);
         }
@@ -49,7 +51,7 @@ namespace SimpleDI
         {
             Type type = typeof(T);
             Type[] interfaceTypes = type.GetInterfaces();
-            object instance = Instantiate(type, args);
+            object instance = InstantiateInternal(type, args);
 
             for (int i = 0; i < interfaceTypes.Length; ++i)
             {
@@ -125,6 +127,27 @@ namespace SimpleDI
             return _instances.GetEnumerator();
         }
 
+        public T Instantiate<T>(params object[] args) where T : class
+        {
+            Type type = typeof(T);
+            object instance = InstantiateInternal(type, args);
+
+            InjectUtil.InjectWithContainer(this, instance);
+            return instance as T;
+        }
+
+        public GameObject InstantiatePrefab(GameObject prefab)
+        {
+            GameObject instance = GameObject.Instantiate(prefab);
+            InjectUtil.InjectWithContainer(this, instance);
+            return instance;
+        }
+
+        public void Inject(object instance)
+        {
+            InjectUtil.InjectWithContainer(this, instance);
+        }
+
         private void Bind(Type type, bool singleInstance, object instance = null, params object[] args)
         {
             if (!_instancesByType.TryGetValue(type, out BindInfo bindInfo))
@@ -145,7 +168,7 @@ namespace SimpleDI
 
             if (instance == null)
             {
-                instance = Instantiate(type, args);
+                instance = InstantiateInternal(type, args);
             }
 
             if (instance != null)
@@ -155,7 +178,7 @@ namespace SimpleDI
             }
         }
 
-        private object Instantiate(Type type, params object[] args)
+        private object InstantiateInternal(Type type, params object[] args)
         {
             object instance = Activator.CreateInstance(type, args);
             Debug.Assert(instance != null, $"Failed to instantiate {type}.");
