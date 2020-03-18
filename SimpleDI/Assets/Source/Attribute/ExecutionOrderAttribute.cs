@@ -8,7 +8,7 @@ namespace SimpleDI
     [AttributeUsage(AttributeTargets.Class)]
     public class ExecutionOrderAttribute : Attribute
     {
-        public bool FixedOrder { get; set; } = false;
+        public bool FixedOrder { get; set; } = true;
 
         public int Order { get; }
 

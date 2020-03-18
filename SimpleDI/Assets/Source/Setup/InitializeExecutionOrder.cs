@@ -30,7 +30,8 @@ namespace SimpleDI
                 }
 
                 int order = MonoImporter.GetExecutionOrder(script);
-                if (!attribute.FixedOrder && order != 0)
+                if (!attribute.FixedOrder && order != 0 ||
+                    attribute.FixedOrder && order == attribute.Order)
                 {
                     continue;
                 }
