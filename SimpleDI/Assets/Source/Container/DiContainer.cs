@@ -10,6 +10,8 @@ namespace SimpleDI
 
         private Dictionary<Type, BindInfo> _instancesByType = new Dictionary<Type, BindInfo>();
 
+        private Dictionary<Type, object> _instancesByOriginalType = new Dictionary<Type, object>();
+
         private List<object> _instances = new List<object>();
 
         public DiContainer(params DiContainer[] parents)
@@ -24,9 +26,23 @@ namespace SimpleDI
             Bind(typeof(T), singleInstance, args: args);
         }
 
+        public void BindTo<TFrom, TTo>(bool singleInstance = true, params object[] args)
+                where TFrom : class
+                where TTo : class
+        {
+            Type fromType = typeof(TFrom);
+            Type toType = typeof(TTo);
+            object instance = Instantiate(fromType, args);
+
+            Bind(toType, singleInstance, instance, args: args);
+        }
+
         public void BindFrom<T>(object instance, bool singleInstance = true) where T : class
         {
-            Bind(typeof(T), singleInstance, instance);
+            Type type = typeof(T);
+
+            _instancesByOriginalType.Add(type, instance);
+            Bind(type, singleInstance, instance);
         }
 
         public void BindAllInterfaces<T>(params object[] args) where T : class
@@ -44,6 +60,7 @@ namespace SimpleDI
         public void UnbindAll()
         {
             _instancesByType.Clear();
+            _instancesByOriginalType.Clear();
             _instances.Clear();
         }
 
@@ -142,6 +159,7 @@ namespace SimpleDI
         {
             object instance = Activator.CreateInstance(type, args);
             Debug.Assert(instance != null, $"Failed to instantiate {type}.");
+            _instancesByOriginalType.Add(type, instance);
             return instance;
         }
 
