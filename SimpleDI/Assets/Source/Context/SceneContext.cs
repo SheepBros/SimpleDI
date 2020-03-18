@@ -1,4 +1,4 @@
-﻿using System;
+﻿using SimpleDI.Util;
 using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,11 +44,9 @@ namespace SimpleDI
                 MonoBehaviour[] monoBehaviours = gameObject.GetComponentsInChildren<MonoBehaviour>();
                 foreach (MonoBehaviour behaviour in monoBehaviours)
                 {
-                    GetInjectMethodsFromType(behaviour, injectMethods);
+                    InjectUtil.InjectWithContainer(Container, behaviour);
                 }
             }
-
-            InjectFromInstances(injectMethods);
         }
     }
 }
