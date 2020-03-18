@@ -21,43 +21,23 @@ namespace SimpleDI
 
         public void BindAs<T>(bool singleInstance = true, params object[] args) where T : class
         {
-            Bind(typeof(T), singleInstance, args);
+            Bind(typeof(T), singleInstance, args: args);
         }
 
         public void BindFrom<T>(object instance, bool singleInstance = true) where T : class
         {
-            Type type = typeof(T);
-            if (!_instancesByType.TryGetValue(type, out BindInfo bindInfo))
-            {
-
-                bindInfo = new BindInfo()
-                {
-                    Single = singleInstance
-                };
-
-                _instancesByType.Add(type, bindInfo);
-            }
-            else if (singleInstance)
-            {
-                Debug.Assert(!singleInstance, $"Trying to instantiate a single instance({type}). But, the instance is already instantiated.");
-                return;
-            }
-
-            if (instance != null)
-            {
-                bindInfo.Instances.Add(instance);
-                _instances.Add(instance);
-            }
+            Bind(typeof(T), singleInstance, instance);
         }
 
-        public void BindAllInterfaces<T>() where T : class
+        public void BindAllInterfaces<T>(params object[] args) where T : class
         {
             Type type = typeof(T);
             Type[] interfaceTypes = type.GetInterfaces();
+            object instance = Instantiate(type, args);
 
             for (int i = 0; i < interfaceTypes.Length; ++i)
             {
-                Bind(interfaceTypes[i], false);
+                Bind(interfaceTypes[i], false, instance);
             }
         }
 
@@ -128,7 +108,7 @@ namespace SimpleDI
             return _instances.GetEnumerator();
         }
 
-        private void Bind(Type type, bool singleInstance, params object[] args)
+        private void Bind(Type type, bool singleInstance, object instance = null, params object[] args)
         {
             if (!_instancesByType.TryGetValue(type, out BindInfo bindInfo))
             {
@@ -146,7 +126,11 @@ namespace SimpleDI
                 return;
             }
 
-            object instance = Instantiate(type, args);
+            if (instance == null)
+            {
+                instance = Instantiate(type, args);
+            }
+
             if (instance != null)
             {
                 bindInfo.Instances.Add(instance);

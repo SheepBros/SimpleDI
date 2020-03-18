@@ -18,7 +18,7 @@ namespace SimpleDI
             {
                 Type type = script.GetClass();
                 // Check only classes in SimpleDI namespace.
-                if (type == default || !type.Namespace.Contains("SimpleDI"))
+                if (type == default || string.IsNullOrEmpty(type.Namespace) || !type.Namespace.Contains("SimpleDI"))
                 {
                     continue;
                 }

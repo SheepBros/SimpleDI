@@ -20,6 +20,7 @@ namespace SimpleDI
 
         protected void Install()
         {
+            Container.BindFrom<DiContainer>(Container);
             Container.BindAs<InitializableManager>();
             Container.BindAs<UpdatableManager>();
             Container.BindAs<DisposableManager>();
