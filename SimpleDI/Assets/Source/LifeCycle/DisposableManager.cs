@@ -13,7 +13,16 @@ namespace SimpleDI
         [Inject]
         public void InitInjections(IDisposable[] disposables)
         {
-            _disposables.AddRange(disposables);
+            if (disposables != null)
+            {
+                for (int i = 0; i < disposables.Length; ++i)
+                {
+                    if (disposables[i] != null)
+                    {
+                        _disposables.Add(disposables[i]);
+                    }
+                }
+            }
         }
 
         public void Dispose()

@@ -2,6 +2,6 @@
 {
     public interface IInitializable
     {
-        void Initlaize();
+        void Initialize();
     }
 }
