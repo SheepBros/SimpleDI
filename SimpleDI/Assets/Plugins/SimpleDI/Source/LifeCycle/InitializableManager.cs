@@ -10,7 +10,9 @@ namespace SimpleDI
         private bool _initialized = false;
 
         [Inject]
-        public void InitInjections(IInitializable[] initializables)
+        public void InitContexts(
+            [InjectRange(false)]
+            IInitializable[] initializables)
         {
             if (initializables != null)
             {

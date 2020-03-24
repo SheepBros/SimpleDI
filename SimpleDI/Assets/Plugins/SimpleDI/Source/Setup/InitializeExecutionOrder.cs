@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+using System;
 using System.Reflection;
 using UnityEditor;
 
@@ -41,3 +42,4 @@ namespace SimpleDI
         }
     }
 }
+#endif

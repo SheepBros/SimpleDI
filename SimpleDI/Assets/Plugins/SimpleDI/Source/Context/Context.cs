@@ -11,7 +11,10 @@ namespace SimpleDI
 
         protected virtual void OnDestroy()
         {
-            Container.UnbindAll();
+            if (Container != null)
+            {
+                Container.UnbindAll();
+            }
         }
 
         protected virtual void InstallInternal() { }

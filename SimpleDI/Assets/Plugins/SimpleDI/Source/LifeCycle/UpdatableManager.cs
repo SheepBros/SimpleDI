@@ -11,7 +11,13 @@ namespace SimpleDI
         private List<ILateUpdatable> _lateUpdatables = new List<ILateUpdatable>();
 
         [Inject]
-        public void InitInjections(IFixedUpdatable[] fixedUpdatables, IUpdatable[] updatables, ILateUpdatable[] lateUpdatables)
+        public void InitContexts(
+            [InjectRange(false)]
+            IFixedUpdatable[] fixedUpdatables,
+            [InjectRange(false)]
+            IUpdatable[] updatables,
+            [InjectRange(false)]
+            ILateUpdatable[] lateUpdatables)
         {
             if (fixedUpdatables != null)
             {

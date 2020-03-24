@@ -1,5 +1,4 @@
 ﻿using SimpleDI.Util;
-using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,7 +37,6 @@ namespace SimpleDI
         private void InjectMonoBehaviours()
         {
             GameObject[] rootGameObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
-            List<(object, MethodInfo)> injectMethods = new List<(object, MethodInfo)>();
             foreach (GameObject gameObject in rootGameObjects)
             {
                 MonoBehaviour[] monoBehaviours = gameObject.GetComponentsInChildren<MonoBehaviour>();

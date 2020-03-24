@@ -41,14 +41,34 @@ namespace SimpleDI.Util
                 for (int i = 0; i < parameters.Length; ++i)
                 {
                     ParameterInfo parameter = parameters[i];
+                    bool allowParentInstace = true;
+                    var attributes = parameter.GetCustomAttributes();
+                    foreach (Attribute attribute in attributes)
+                    {
+                        if (attribute is InjectRangeAttribute)
+                        {
+                            allowParentInstace = ((InjectRangeAttribute)attribute).AllowParent;
+                            break;
+                        }
+                    }
+
                     Type parameterType = parameter.ParameterType;
                     if (parameterType.IsArray)
                     {
-                        args[i] = container.GetInstances(parameterType);
+                        Type elementType = parameterType.GetElementType();
+                        object[] instances = container.GetInstances(elementType, allowParentInstace);
+                        if (instances == null)
+                        {
+                            continue;
+                        }
+
+                        Array convertedInstances = Array.CreateInstance(elementType, instances.Length);
+                        Array.Copy(instances, convertedInstances, instances.Length);
+                        args[i] = convertedInstances;
                     }
                     else
                     {
-                        args[i] = container.GetInstance(parameterType);
+                        args[i] = container.GetInstance(parameterType, allowParentInstace);
                     }
                 }
             }
