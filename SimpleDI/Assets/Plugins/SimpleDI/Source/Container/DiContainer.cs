@@ -6,7 +6,7 @@ using Debug = System.Diagnostics.Debug;
 
 namespace SimpleDI
 {
-    public class DiContainer
+    public class DiContainer 
     {
         private readonly List<DiContainer> _parents = new List<DiContainer>();
 
