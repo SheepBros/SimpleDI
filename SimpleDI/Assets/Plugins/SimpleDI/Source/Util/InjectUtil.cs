@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Collections.Generic;
 
 namespace SimpleDI.Util
 {
@@ -7,31 +8,39 @@ namespace SimpleDI.Util
     {
         public static void InjectWithContainer(DiContainer container, object instance)
         {
-            if (GetInjectMethod(instance, out MethodInfo methodInfo))
+            if (GetInjectMethod(instance, out MethodInfo[] methodInfoArray))
             {
-                InvokeInjectMethod(instance, methodInfo, container);
+                InvokeInjectMethodArray(instance, methodInfoArray, container);
             }
         }
 
-        public static bool GetInjectMethod(object instance, out MethodInfo methodInfo)
+        public static bool GetInjectMethod(object instance, out MethodInfo[] methodInfoArray)
         {
             Type type = instance.GetType();
-            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
+            List<MethodInfo> methodList = new List<MethodInfo>();
             foreach (MethodInfo method in methods)
             {
                 if (method.GetCustomAttribute<InjectAttribute>() != null)
                 {
-                    methodInfo = method;
-                    return true;
+                    methodList.Add(method);
                 }
             }
 
-            methodInfo = null;
-            return false;
+            methodInfoArray = methodList.ToArray();
+            return methodInfoArray.Length > 0;
         }
 
-        public static void InvokeInjectMethod(object instance, MethodInfo methodInfo, DiContainer container)
+        private static void InvokeInjectMethodArray(object instance, MethodInfo[] methodInfoArray, DiContainer container)
+        {
+            for (int i = 0; i < methodInfoArray.Length; ++i)
+            {
+                InvokeInjectMethod(instance, methodInfoArray[i], container);
+            }
+        }
+
+        private static void InvokeInjectMethod(object instance, MethodInfo methodInfo, DiContainer container)
         {
             ParameterInfo[] parameters = methodInfo.GetParameters();
             object[] args = null;
@@ -69,6 +78,7 @@ namespace SimpleDI.Util
                     else
                     {
                         args[i] = container.GetInstance(parameterType, allowParentInstace);
+                        //UnityEngine.Debug.LogError($"{instance.GetType()} Bind {parameterType} {args[i] == null}");
                     }
                 }
             }

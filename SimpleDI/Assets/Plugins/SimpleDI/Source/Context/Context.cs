@@ -46,7 +46,7 @@ namespace SimpleDI
             var instances = Container.GetAllInstances();
             while (instances.MoveNext())
             {
-                InjectUtil.InjectWithContainer(Container, instances.Current);
+                Container.Inject(instances.Current);
             }
         }
     }
