@@ -1,9 +1,7 @@
-﻿using SimpleDI.Util;
-using System;
-using System.Reflection;
-using System.Diagnostics;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using SimpleDI.Util;
 using Debug = System.Diagnostics.Debug;
 
 namespace SimpleDI
@@ -16,17 +14,26 @@ namespace SimpleDI
 
         private List<object> _instances = new List<object>();
 
+        private List<Type> _typeOfLifeCycleInterfaces = new List<Type>()
+        {
+            typeof(IInitializable),
+            typeof(IDisposable),
+            typeof(IUpdatable),
+            typeof(IFixedUpdatable),
+            typeof(ILateUpdatable)
+        };
+
         public DiContainer(params DiContainer[] parents)
         {
             _parents.AddRange(parents);
         }
 
-        public void BindAs<T>(bool singleInstance = true, params object[] args) where T : class
+        public void BindAs<T>(bool singleInstance = true, bool bindToParents = false, params object[] args) where T : class
         {
-            Bind(typeof(T), singleInstance, args: args);
+            Bind(typeof(T), singleInstance, bindToParents: bindToParents, args: args);
         }
 
-        public void BindTo<TFrom, TTo>(bool singleInstance = true, params object[] args)
+        public void BindTo<TFrom, TTo>(bool singleInstance = true, bool bindToParents = false, params object[] args)
                 where TFrom : class
                 where TTo : class
         {
@@ -34,43 +41,70 @@ namespace SimpleDI
             Type toType = typeof(TTo);
             object instance = InstantiateInternal(fromType, args);
 
-            Bind(toType, singleInstance, instance, args: args);
+            Bind(toType, singleInstance, bindToParents: bindToParents, instance: instance, args: args);
         }
 
-        public void BindFrom<T>(object instance, bool singleInstance = true) where T : class
+        public void BindFrom<T>(object instance, bool singleInstance = true, bool bindToParents = false) where T : class
         {
-            Type type = typeof(T);
-
-            Bind(type, singleInstance, instance);
+            Bind(typeof(T), singleInstance, bindToParents: bindToParents, instance);
         }
 
-        public void BindAllInterfacesFrom<T>(object instance) where T : class
+        public void BindAllInterfaces<T>(bool bindToParents = false, params object[] args) where T : class
         {
             Type type = typeof(T);
-            Type[] interfaceTypes = type.GetInterfaces();
-
-            for (int i = 0; i < interfaceTypes.Length; ++i)
-            {
-                Bind(interfaceTypes[i], false, instance);
-            }
-        }
-
-        public void BindAllInterfaces<T>(params object[] args) where T : class
-        {
-            Type type = typeof(T);
-            Type[] interfaceTypes = type.GetInterfaces();
             object instance = InstantiateInternal(type, args);
+            BindAllInterfacesFrom<T>(instance, bindToParents);
+        }
+
+        public void BindAllInterfacesFrom<T>(object instance, bool bindToParents = false) where T : class
+        {
+            Type type = typeof(T);
+            Type[] interfaceTypes = type.GetInterfaces();
 
             for (int i = 0; i < interfaceTypes.Length; ++i)
             {
-                Bind(interfaceTypes[i], false, instance);
+                Type interfaceType = interfaceTypes[i];
+                bool canBeSingle = !_typeOfLifeCycleInterfaces.Contains(interfaceType);
+                Bind(interfaceType, canBeSingle, bindToParents, instance);
             }
         }
 
         public void UnbindAll()
         {
+            for (int i = 0; i < _parents.Count; ++i)
+            {
+                foreach (var pair in _instancesByType)
+                {
+                    _parents[i].Unbind(pair.Key);
+                }
+            }
+
             _instancesByType.Clear();
             _instances.Clear();
+        }
+
+        public void Unbind<T>() where T : class
+        {
+            Unbind(typeof(T));
+        }
+
+        public void Unbind(Type type)
+        {
+            if (_instancesByType.TryGetValue(type, out BindInfo bindInfo))
+            {
+                for (int i = 0; i < bindInfo.Instances.Count; ++i)
+                {
+                    object instance = bindInfo.Instances[i];
+                    _instances.Remove(instance);
+                }
+
+                _instancesByType.Remove(type);
+            }
+
+            for (int i = 0; i < _parents.Count; ++i)
+            {
+                _parents[i].Unbind(type);
+            }
         }
 
         public T GetInstance<T>(bool allowParentInstance = true) where T : class
@@ -94,8 +128,9 @@ namespace SimpleDI
             }
 
             object instance = null;
-            foreach (DiContainer parent in _parents)
+            for (int i = 0; i < _parents.Count; ++i)
             {
+                DiContainer parent = _parents[i];
                 instance = parent.GetInstance(type);
                 if (instance != null)
                 {
@@ -108,7 +143,7 @@ namespace SimpleDI
 
         public T[] GetInstances<T>(bool allowParentInstance = true) where T : class
         {
-            return GetInstances(typeof(T)) as T[];
+            return GetInstances(typeof(T), allowParentInstance) as T[];
         }
 
         public object[] GetInstances(Type type, bool allowParentInstance = true)
@@ -127,8 +162,9 @@ namespace SimpleDI
             }
 
             List<object> instances = new List<object>();
-            foreach (DiContainer parent in _parents)
+            for (int i = 0; i < _parents.Count; ++i)
             {
+                DiContainer parent = _parents[i];
                 object[] parentInstances = parent.GetInstances(type);
                 if (instances != null)
                 {
@@ -162,10 +198,26 @@ namespace SimpleDI
 
         public void Inject(object instance)
         {
-            InjectUtil.InjectWithContainer(this, instance);
+            if (instance is GameObject gameObject)
+            {
+                InjectGameObject(gameObject);
+            }
+            else
+            {
+                InjectUtil.InjectWithContainer(this, instance);
+            }
         }
 
-        private void Bind(Type type, bool singleInstance, object instance = null, params object[] args)
+        private void InjectGameObject(GameObject gameObject)
+        {
+            MonoBehaviour[] monoBehaviours = gameObject.GetComponentsInChildren<MonoBehaviour>();
+            foreach (MonoBehaviour behaviour in monoBehaviours)
+            {
+                InjectUtil.InjectWithContainer(this, behaviour);
+            }
+        }
+
+        private void Bind(Type type, bool singleInstance, bool bindToParents = false, object instance = null, params object[] args)
         {
             if (!_instancesByType.TryGetValue(type, out BindInfo bindInfo))
             {
@@ -194,6 +246,14 @@ namespace SimpleDI
                 if (!_instances.Contains(instance))
                 {
                     _instances.Add(instance);
+                }
+
+                if (bindToParents && singleInstance)
+                {
+                    for (int i = 0; i < _parents.Count; ++i)
+                    {
+                        _parents[i].Bind(type, singleInstance, bindToParents, instance, args);
+                    }
                 }
             }
         }
