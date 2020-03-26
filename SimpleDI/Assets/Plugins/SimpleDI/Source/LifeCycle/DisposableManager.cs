@@ -11,7 +11,9 @@ namespace SimpleDI
         private bool _disposed = false;
 
         [Inject]
-        public void InitInjections(IDisposable[] disposables)
+        public void InitContexts(
+            [InjectRange(false)]
+            IDisposable[] disposables)
         {
             if (disposables != null)
             {

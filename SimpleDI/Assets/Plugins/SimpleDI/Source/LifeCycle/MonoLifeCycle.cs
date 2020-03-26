@@ -12,8 +12,13 @@ namespace SimpleDI
         private DisposableManager _disposableManager;
 
         [Inject]
-        public void InitInjections(InitializableManager initializableManager,
-            UpdatableManager updatableManager, DisposableManager disposableManager)
+        public void InitContexts(
+            [InjectRange(false)]
+            InitializableManager initializableManager,
+            [InjectRange(false)]
+            UpdatableManager updatableManager,
+            [InjectRange(false)]
+            DisposableManager disposableManager)
         {
             _initializableManager = initializableManager;
             _updatableManager = updatableManager;

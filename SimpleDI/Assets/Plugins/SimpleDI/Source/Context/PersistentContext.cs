@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using SimpleDI.Util;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -57,6 +57,22 @@ namespace SimpleDI
             {
                 installer.Initialize(Container);
                 installer.InstallBindings();
+            }
+
+            InjectMonoBehaviours();
+        }
+
+        private void InjectMonoBehaviours()
+        {
+            // Search game objects under DontDestroyOnLoad scene.
+            GameObject[] rootGameObjects = this.gameObject.scene.GetRootGameObjects();
+            foreach (GameObject gameObject in rootGameObjects)
+            {
+                MonoBehaviour[] monoBehaviours = gameObject.GetComponentsInChildren<MonoBehaviour>();
+                foreach (MonoBehaviour behaviour in monoBehaviours)
+                {
+                    InjectUtil.InjectWithContainer(Container, behaviour);
+                }
             }
         }
     }

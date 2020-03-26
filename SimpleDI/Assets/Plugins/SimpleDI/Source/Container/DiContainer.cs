@@ -14,8 +14,6 @@ namespace SimpleDI
 
         private Dictionary<Type, BindInfo> _instancesByType = new Dictionary<Type, BindInfo>();
 
-        private Dictionary<Type, object> _instancesByOriginalType = new Dictionary<Type, object>();
-
         private List<object> _instances = new List<object>();
 
         public DiContainer(params DiContainer[] parents)
@@ -43,8 +41,18 @@ namespace SimpleDI
         {
             Type type = typeof(T);
 
-            _instancesByOriginalType.Add(type, instance);
             Bind(type, singleInstance, instance);
+        }
+
+        public void BindAllInterfacesFrom<T>(object instance) where T : class
+        {
+            Type type = typeof(T);
+            Type[] interfaceTypes = type.GetInterfaces();
+
+            for (int i = 0; i < interfaceTypes.Length; ++i)
+            {
+                Bind(interfaceTypes[i], false, instance);
+            }
         }
 
         public void BindAllInterfaces<T>(params object[] args) where T : class
@@ -62,16 +70,15 @@ namespace SimpleDI
         public void UnbindAll()
         {
             _instancesByType.Clear();
-            _instancesByOriginalType.Clear();
             _instances.Clear();
         }
 
-        public T GetInstance<T>() where T : class
+        public T GetInstance<T>(bool allowParentInstance = true) where T : class
         {
-            return GetInstance(typeof(T)) as T;
+            return GetInstance(typeof(T), allowParentInstance) as T;
         }
 
-        public object GetInstance(Type type)
+        public object GetInstance(Type type, bool allowParentInstance = true)
         {
             if (_instancesByType.TryGetValue(type, out BindInfo bindInfo))
             {
@@ -79,6 +86,11 @@ namespace SimpleDI
                 {
                     return bindInfo.Instances[0];
                 }
+            }
+
+            if (!allowParentInstance)
+            {
+                return null;
             }
 
             object instance = null;
@@ -94,12 +106,12 @@ namespace SimpleDI
             return instance;
         }
 
-        public T[] GetInstances<T>() where T : class
+        public T[] GetInstances<T>(bool allowParentInstance = true) where T : class
         {
             return GetInstances(typeof(T)) as T[];
         }
 
-        public object[] GetInstances(Type type)
+        public object[] GetInstances(Type type, bool allowParentInstance = true)
         {
             if (_instancesByType.TryGetValue(type, out BindInfo bindInfo))
             {
@@ -109,17 +121,22 @@ namespace SimpleDI
                 }
             }
 
-            object[] instances = null;
+            if (!allowParentInstance)
+            {
+                return null;
+            }
+
+            List<object> instances = new List<object>();
             foreach (DiContainer parent in _parents)
             {
-                instances = parent.GetInstances(type);
+                object[] parentInstances = parent.GetInstances(type);
                 if (instances != null)
                 {
-                    break;
+                    instances.AddRange(parentInstances);
                 }
             }
 
-            return instances;
+            return instances.ToArray();
         }
 
         public IEnumerator<object> GetAllInstances()
@@ -152,7 +169,6 @@ namespace SimpleDI
         {
             if (!_instancesByType.TryGetValue(type, out BindInfo bindInfo))
             {
-
                 bindInfo = new BindInfo()
                 {
                     Single = singleInstance
@@ -174,7 +190,11 @@ namespace SimpleDI
             if (instance != null)
             {
                 bindInfo.Instances.Add(instance);
-                _instances.Add(instance);
+
+                if (!_instances.Contains(instance))
+                {
+                    _instances.Add(instance);
+                }
             }
         }
 
@@ -182,7 +202,6 @@ namespace SimpleDI
         {
             object instance = Activator.CreateInstance(type, args);
             Debug.Assert(instance != null, $"Failed to instantiate {type}.");
-            _instancesByOriginalType.Add(type, instance);
             return instance;
         }
 
