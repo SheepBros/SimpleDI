@@ -39,11 +39,7 @@ namespace SimpleDI
             GameObject[] rootGameObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
             foreach (GameObject gameObject in rootGameObjects)
             {
-                MonoBehaviour[] monoBehaviours = gameObject.GetComponentsInChildren<MonoBehaviour>();
-                foreach (MonoBehaviour behaviour in monoBehaviours)
-                {
-                    InjectUtil.InjectWithContainer(Container, behaviour);
-                }
+                Container.Inject(gameObject);
             }
         }
     }
