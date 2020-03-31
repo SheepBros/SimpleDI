@@ -6,6 +6,9 @@ Unity에서 사용될 수 있는 Dependency Injection 패턴을 구현한 플러
 
 Note: 이 프로젝트는 Unity전용 DI Framework인 [Zenject](https://github.com/modesttree/Zenject)의 Reflection을 이용한 기초적인 알고리즘 아이디어를 얻어 제작되었음을 밝힙니다.
 
+## Unity 버전
+이 프로젝트는 2018.4.20f1(LTS) 버전에 맞게 수정되었습니다.
+
 ## 사용법
 SimpleDI는 제한된 DI 인터페이스를 제공합니다.
 SimpleDI를 사용하기 위해서는 Container와 Context, Installer를 알아야합니다.
