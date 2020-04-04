@@ -2,6 +2,10 @@
 
 namespace SimpleDI
 {
+    /// <summary>
+    /// This is a manager class that provides the same environment as the update methods of Monobehaviour.
+    /// It's dependent to context and There is one UpdatableManager for each context.
+    /// </summary>
     public class UpdatableManager
     {
         private List<IFixedUpdatable> _fixedUpdatables = new List<IFixedUpdatable>();

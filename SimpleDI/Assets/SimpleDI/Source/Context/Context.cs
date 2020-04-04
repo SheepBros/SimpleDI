@@ -1,10 +1,10 @@
-﻿using SimpleDI.Util;
-using System.Reflection;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SimpleDI
 {
+    /// <summary>
+    /// Context is a class that holds a container and gives interfaces to bind instances into the container.
+    /// </summary>
     public abstract class Context : MonoBehaviour
     {
         public abstract DiContainer Container { get; protected set; }

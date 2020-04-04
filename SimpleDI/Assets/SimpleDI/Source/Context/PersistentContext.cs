@@ -4,7 +4,11 @@ using UnityEngine;
 
 namespace SimpleDI
 {
-    [ExecutionOrderAttribute(-9999)]
+    /// <summary>
+    /// PersistentContext is a context that remains persistent until the game ends.
+    /// Usually, it's used to keep an instance that is used for the whole time.
+    /// </summary>
+    [ExecutionOrder(-9999)]
     public class PersistentContext : Context
     {
         private static PersistentContext _instance;

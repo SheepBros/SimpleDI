@@ -1,10 +1,13 @@
-﻿using SimpleDI.Util;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace SimpleDI
 {
-    [ExecutionOrderAttribute(-9000)]
+    /// <summary>
+    /// SceneContext is a context in a certain scene.
+    /// It's usually used to bind an instance that is used only in a scene.
+    /// </summary>
+    [ExecutionOrder(-9000)]
     public class SceneContext : Context
     {
         public override DiContainer Container { get; protected set; }

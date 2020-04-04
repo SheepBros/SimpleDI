@@ -6,6 +6,10 @@ using Debug = System.Diagnostics.Debug;
 
 namespace SimpleDI
 {
+    /// <summary>
+    /// Container class has a reference for instances.
+    /// It does inject instances into an object.
+    /// </summary>
     public class DiContainer
     {
         private readonly List<DiContainer> _parents = new List<DiContainer>();

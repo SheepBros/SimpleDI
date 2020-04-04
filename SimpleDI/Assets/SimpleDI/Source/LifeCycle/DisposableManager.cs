@@ -4,6 +4,10 @@ using System.Collections.Generic;
 
 namespace SimpleDI
 {
+    /// <summary>
+    /// This is a manager class that notifies Dispose event when the context is destroyed.
+    /// It's dependent to context and There is one DisposableManager for each context.
+    /// </summary>
     public class DisposableManager
     {
         private List<IDisposable> _disposables = new List<IDisposable>();

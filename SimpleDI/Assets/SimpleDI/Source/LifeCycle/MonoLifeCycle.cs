@@ -2,7 +2,11 @@
 
 namespace SimpleDI
 {
-    [ExecutionOrderAttribute(-8900)]
+    /// <summary>
+    /// This executes events of InitializableManager, UpdatableManager, DisposableManager.
+    /// It's automatically attached to a gameobject by Context when the context is initialized.
+    /// </summary>
+    [ExecutionOrder(-8900)]
     public class MonoLifeCycle : MonoBehaviour
     {
         private InitializableManager _initializableManager;

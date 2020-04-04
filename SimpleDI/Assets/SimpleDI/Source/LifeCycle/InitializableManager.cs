@@ -3,6 +3,12 @@ using System.Collections.Generic;
 
 namespace SimpleDI
 {
+    /// <summary>
+    /// This is a manager class that notifies Initialize event.
+    /// It's dependent to context and There is one InitializableManager for each context.
+    /// The initialize event is notified only one time after the context is initialized.
+    /// It never notifies the event again.
+    /// </summary>
     public class InitializableManager
     {
         private List<IInitializable> _initializables = new List<IInitializable>();

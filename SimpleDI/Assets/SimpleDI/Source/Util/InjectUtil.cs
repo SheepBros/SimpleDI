@@ -6,6 +6,9 @@ namespace SimpleDI.Util
 {
     public static class InjectUtil
     {
+        /// <summary>
+        /// Injects references in the container into the instance.
+        /// </summary>
         public static void InjectWithContainer(DiContainer container, object instance)
         {
             if (GetInjectMethod(instance, out MethodInfo[] methodInfoArray))
@@ -14,6 +17,9 @@ namespace SimpleDI.Util
             }
         }
 
+        /// <summary>
+        /// Get a method that is defined the InjectAttribute.
+        /// </summary>
         public static bool GetInjectMethod(object instance, out MethodInfo[] methodInfoArray)
         {
             Type type = instance.GetType();
