@@ -56,13 +56,13 @@ namespace SimpleDI.Util
                 for (int i = 0; i < parameters.Length; ++i)
                 {
                     ParameterInfo parameter = parameters[i];
-                    bool allowParentInstace = true;
+                    bool allowParentInstance = true;
                     var attributes = parameter.GetCustomAttributes();
                     foreach (Attribute attribute in attributes)
                     {
-                        if (attribute is InjectRangeAttribute)
+                        if (attribute is InjectRangeAttribute rangeAttribute)
                         {
-                            allowParentInstace = ((InjectRangeAttribute)attribute).AllowParent;
+                            allowParentInstance = rangeAttribute.AllowParent;
                             break;
                         }
                     }
@@ -71,7 +71,7 @@ namespace SimpleDI.Util
                     if (parameterType.IsArray)
                     {
                         Type elementType = parameterType.GetElementType();
-                        object[] instances = container.GetInstances(elementType, allowParentInstace);
+                        object[] instances = container.GetInstances(elementType, allowParentInstance);
                         if (instances == null)
                         {
                             continue;
@@ -83,8 +83,7 @@ namespace SimpleDI.Util
                     }
                     else
                     {
-                        args[i] = container.GetInstance(parameterType, allowParentInstace);
-                        //UnityEngine.Debug.LogError($"{instance.GetType()} Bind {parameterType} {args[i] == null}");
+                        args[i] = container.GetInstance(parameterType, allowParentInstance);
                     }
                 }
             }
