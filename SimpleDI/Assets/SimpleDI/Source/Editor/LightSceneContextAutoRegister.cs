@@ -22,11 +22,11 @@ namespace SimpleDI
                 return;
             }
 
-            EditorSceneManager.sceneSaved -= OnSceneSaved;
-            EditorSceneManager.sceneSaved += OnSceneSaved;
+            EditorSceneManager.sceneSaving -= OnSceneSaving;
+            EditorSceneManager.sceneSaving += OnSceneSaving;
         }
 
-        private static void OnSceneSaved(Scene scene)
+        private static void OnSceneSaving(Scene scene, string path)
         {
             GameObject[] rootObjects = scene.GetRootGameObjects();
             foreach (GameObject rootObject in rootObjects)
